@@ -1,0 +1,2 @@
+lib/hooks/use-portfolio.ts(126,5): error TS2783: 'availableCash' is specified more than once, so this usage will be overwritten.
+lib/hooks/use-portfolio.ts(127,5): error TS2783: 'totalAssets' is specified more than once, so this usage will be overwritten.
