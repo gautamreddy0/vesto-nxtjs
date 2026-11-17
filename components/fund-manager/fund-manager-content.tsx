@@ -43,7 +43,7 @@ function saveDemoApproval(symbol: string) {
 }
 
 function saveLatestPitch(symbol: string, companyName: string, review: PitchMemoData, pitchText: string, submissionId?: number) {
-  if (!review || !['approved', 'rejected', 'pending'].includes(review.status)) return;
+  if (!review || (review.status !== 'approved' && review.status !== 'rejected' && review.status !== 'pending')) return;
   try {
     window.localStorage.setItem('vesto-last-pitch', JSON.stringify({
       symbol,

@@ -134,7 +134,7 @@ export default function PortfolioPage() {
             <div className="mt-6 flex w-full flex-col justify-center gap-2 sm:w-auto sm:flex-row">
               <Link href="/markets"><Button type="button" variant="outline" className="w-full gap-2 sm:w-auto">Explore Markets<ArrowRight className="h-4 w-4" /></Button></Link>
               <Link href="/fund-manager"><Button type="button" className="w-full gap-2 sm:w-auto">Make Your First Investment<ArrowRight className="h-4 w-4" /></Button></Link>
-              {isLocalStore && loadSamplePortfolio && <Button type="button" variant="secondary" onClick={handleLoadSample} className="w-full sm:w-auto">Load sample portfolio</Button>}
+              {isLocalStore && <Button type="button" variant="secondary" onClick={handleLoadSample} className="w-full sm:w-auto">Load sample portfolio</Button>}
             </div>
           </CardContent>
         </Card>

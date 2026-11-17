@@ -38,7 +38,7 @@ export function LatestAiVerdict() {
               <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${pitch.status === 'approved' ? 'bg-success-bg text-success' : pitch.status === 'rejected' ? 'bg-danger-bg text-danger' : 'bg-muted-bg text-muted-foreground'}`}>
                 {pitch.status}
               </span>
-              <ScoreGauge score={pitch.score} symbol={pitch.symbol} />
+              <ScoreGauge score={pitch.score ?? null} symbol={pitch.symbol} />
             </div>
             <div className="min-w-0">
               <p className="font-display text-xl font-bold text-foreground">{pitch.symbol}</p>
