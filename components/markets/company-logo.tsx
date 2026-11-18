@@ -17,7 +17,7 @@ export function CompanyLogo({ symbol, logo, size = 'sm', className }: CompanyLog
     <span
       className={cn(
         'relative inline-flex shrink-0 items-center justify-center overflow-hidden border border-border font-display font-bold text-primary-text',
-        logo ? 'bg-white' : 'bg-accent-bg',
+        logo ? 'bg-logo-surface' : 'bg-accent-bg',
         tileSize,
         className,
       )}

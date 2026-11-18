@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   color-scheme: light;
 
@@ -7,9 +9,13 @@
   --card: #FFFFFF;
   --card-foreground: #011231;
   --foreground: #011231;
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
   --muted-bg: #EEF3F8;
+  --muted: var(--muted-bg);
   --muted-foreground: #5B6B82;
   --border: #DCE4EE;
+  --input: var(--border);
   --primary: #0174A2;
   --primary-hover: #015672;
   --primary-foreground: #FFFFFF;
@@ -18,6 +24,7 @@
   --secondary: #EEF3F8;
   --secondary-foreground: #011231;
   --accent: #016E76;
+  --accent-foreground: #FFFFFF;
   --accent-bg: #E5F3F3;
   --accent-text: #015A61;
   --brand-green: #01A156;
@@ -31,6 +38,7 @@
   --info: #0284C7;
   --info-bg: #EFF6FF;
   --ring: #0174A2;
+  --radius: 0.5rem;
   --sidebar: #011231;
   --sidebar-foreground: #C9D6E6;
   --sidebar-muted: #7F93AD;
@@ -45,6 +53,7 @@
   --chart-4: #015672;
   --chart-5: #7CC8EA;
   --chart-6: #8FA3BD;
+  --logo-surface: #FFFFFF;
   --brand-gradient: linear-gradient(135deg, #0182B2 0%, #01A156 60%, #1BBA21 100%);
   --brand-hero: linear-gradient(135deg, #011231 0%, #012A4A 55%, #015672 100%);
   --accent-sage: var(--accent-bg);
@@ -61,8 +70,10 @@
   --hiw-blue-wash: rgba(0, 86, 140, 0.07);
   --hiw-teal-wash: rgba(1, 149, 149, 0.06);
   --hiw-badge: #E6ECF6;
+  --hiw-badge-ring: rgba(1, 18, 49, 0.08);
   --hiw-navy: #011231;
   --hiw-copy: #3E4F66;
+  --hiw-step-border: rgba(1, 29, 60, 0.06);
   --hiw-wave-1: #9EC3E6;
   --hiw-wave-2: #BFD8EE;
   --hiw-candles: #C9DDF0;
@@ -99,9 +110,13 @@ html.dark,
   --card: #0C1F38;
   --card-foreground: #E6EDF5;
   --foreground: #E6EDF5;
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
   --muted-bg: #12294A;
+  --muted: var(--muted-bg);
   --muted-foreground: #8FA3BD;
   --border: #1C3556;
+  --input: var(--border);
   --primary: #38A8D8;
   --primary-hover: #5EBCE4;
   --primary-foreground: #011231;
@@ -110,6 +125,7 @@ html.dark,
   --secondary: #12294A;
   --secondary-foreground: #E6EDF5;
   --accent: #2BB5B0;
+  --accent-foreground: #FFFFFF;
   --accent-bg: #0A3436;
   --accent-text: #5ED6D0;
   --brand-green: #22C55E;
@@ -131,12 +147,12 @@ html.dark,
   --sidebar-active: #5ED6D0;
   --destructive: var(--danger);
   --destructive-foreground: #FFFFFF;
-  --chart-1: #0174A2;
-  --chart-2: #016E76;
-  --chart-3: #01A156;
-  --chart-4: #015672;
+  --chart-1: #38A8D8;
+  --chart-2: #5ED6D0;
+  --chart-3: #22C55E;
+  --chart-4: #A78BFA;
   --chart-5: #7CC8EA;
-  --chart-6: #8FA3BD;
+  --chart-6: #B6C4D6;
   --brand-gradient: linear-gradient(135deg, #0182B2 0%, #01A156 60%, #1BBA21 100%);
   --brand-hero: linear-gradient(135deg, #011231 0%, #012A4A 55%, #015672 100%);
   --hero-cta: #1BBA21;
@@ -145,58 +161,33 @@ html.dark,
   --accent-sage: var(--accent-bg);
   --accent-peach: #10294F;
   --accent-lavender: var(--muted-bg);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not(.light):not(html.light) {
-    color-scheme: dark;
-
-    --background: #061427;
-    --card: #0C1F38;
-    --card-foreground: #E6EDF5;
-    --foreground: #E6EDF5;
-    --muted-bg: #12294A;
-    --muted-foreground: #8FA3BD;
-    --border: #1C3556;
-    --primary: #38A8D8;
-    --primary-hover: #5EBCE4;
-    --primary-foreground: #011231;
-    --primary-text: #7CC8EA;
-    --primary-border: #38A8D8;
-    --secondary: #12294A;
-    --secondary-foreground: #E6EDF5;
-    --accent: #2BB5B0;
-    --accent-bg: #0A3436;
-    --accent-text: #5ED6D0;
-    --brand-green: #22C55E;
-    --brand-green-bright: #34D058;
-    --success: #22C55E;
-    --success-bg: #052E1A;
-    --danger: #F87171;
-    --danger-bg: #3B0D0D;
-    --warning: #FBBF24;
-    --warning-bg: #3A2A06;
-    --info: #38BDF8;
-    --info-bg: #111F3D;
-    --ring: #38A8D8;
-    --sidebar: #040E1F;
-    --sidebar-foreground: #B6C4D6;
-    --sidebar-muted: #6B7F99;
-    --sidebar-border: #10243F;
-    --sidebar-active-bg: rgba(94, 214, 208, 0.14);
-    --sidebar-active: #5ED6D0;
-    --destructive: var(--danger);
-    --destructive-foreground: #FFFFFF;
-    --chart-1: #0174A2;
-    --chart-2: #016E76;
-    --chart-3: #01A156;
-    --chart-4: #015672;
-    --chart-5: #7CC8EA;
-    --chart-6: #8FA3BD;
-    --accent-sage: var(--accent-bg);
-    --accent-peach: #10294F;
-    --accent-lavender: var(--muted-bg);
-  }
+  --hiw-section-start: #081A30;
+  --hiw-section-end: #061427;
+  --hiw-blue-wash: rgba(56, 168, 216, 0.08);
+  --hiw-teal-wash: rgba(43, 181, 176, 0.07);
+  --hiw-badge: #1B3653;
+  --hiw-badge-ring: rgba(124, 200, 234, 0.2);
+  --hiw-navy: #D7E8F7;
+  --hiw-copy: #B6C7D9;
+  --hiw-step-border: #284460;
+  --hiw-wave-1: #315C7D;
+  --hiw-wave-2: #244A68;
+  --hiw-candles: #31526B;
+  --hiw-illustration-shadow: rgba(0, 0, 0, 0.35);
+  --hiw-step-1-bg: #102C4A;
+  --hiw-step-1-num-bg: #194368;
+  --hiw-step-1-num: #A7DCFA;
+  --hiw-step-2-bg: #123528;
+  --hiw-step-2-num-bg: #1C4E37;
+  --hiw-step-2-num: #A7E9BD;
+  --hiw-step-3-bg: #272647;
+  --hiw-step-3-num-bg: #40396A;
+  --hiw-step-3-num: #D4C8FF;
+  --hiw-step-4-bg: #3D2D1C;
+  --hiw-step-4-num-bg: #634723;
+  --hiw-step-4-num: #FFD39A;
+  --hiw-step-3-ring: rgba(167, 139, 250, 0.25);
+  --hiw-step-3-shadow: rgba(0, 0, 0, 0.3);
 }
 
 @theme inline {
@@ -204,6 +195,8 @@ html.dark,
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-hover: var(--primary-hover);
@@ -211,10 +204,13 @@ html.dark,
   --color-primary-text: var(--primary-text);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
   --color-muted-bg: var(--muted-bg);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
+  --color-input: var(--input);
   --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
   --color-accent-bg: var(--accent-bg);
   --color-accent-text: var(--accent-text);
   --color-brand-green: var(--brand-green);
@@ -245,6 +241,7 @@ html.dark,
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
   --color-chart-6: var(--chart-6);
+  --color-logo-surface: var(--logo-surface);
   --color-hero-cta: var(--hero-cta);
   --color-hero-gain: var(--hero-gain);
   --color-hero-sparkle: var(--hero-sparkle);
@@ -340,7 +337,7 @@ h4,
 }
 
 .hiw-step {
-  border-color: rgba(1, 29, 60, 0.06);
+  border-color: var(--hiw-step-border);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 

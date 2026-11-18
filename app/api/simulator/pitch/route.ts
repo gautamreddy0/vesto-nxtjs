@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { GoogleGenerativeAIFetchError } from '@google/generative-ai';
 import { reviewPitch } from '@/lib/ai/review-pitch';
 import { createClient } from '@/lib/supabase/server';
 import { isSupabaseConfigured } from '@/lib/supabase/client';
@@ -8,17 +9,37 @@ import { PITCH_MAX_CHARS } from '@/lib/ai/limits';
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { userId, symbol, companyName, pitchText } = body;
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch (error) {
+      if (!(error instanceof SyntaxError)) throw error;
+      return NextResponse.json(
+        { error: 'The pitch request was empty or invalid. Please try submitting again.' },
+        { status: 400 }
+      );
+    }
 
-    if (!symbol || !pitchText) {
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return NextResponse.json(
+        { error: 'The pitch request was empty or invalid. Please try submitting again.' },
+        { status: 400 }
+      );
+    }
+
+    const { userId, symbol, companyName, pitchText } = body as Record<string, unknown>;
+
+    if (typeof symbol !== 'string' || !symbol.trim() ||
+        typeof companyName !== 'string' || !companyName.trim() ||
+        typeof pitchText !== 'string' || !pitchText.trim() ||
+        (userId !== undefined && typeof userId !== 'string')) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
     }
 
-    if (typeof pitchText !== 'string' || pitchText.length > PITCH_MAX_CHARS) {
+    if (pitchText.length > PITCH_MAX_CHARS) {
       return NextResponse.json(
         { error: `Pitch too long (max ${PITCH_MAX_CHARS.toLocaleString('en-US')} characters)` },
         { status: 400 }
@@ -83,7 +104,22 @@ Key Metrics: P/E ${f.pe_ratio}, ROE ${f.roe}%, Debt/Equity ${f.debt_to_equity}
     }
 
     // Review pitch with AI (using gemini-2.5-flash)
-    const review = await reviewPitch(companyName, symbol, pitchText, companyContext);
+    let review;
+    try {
+      review = await reviewPitch(companyName, symbol, pitchText, companyContext);
+    } catch (error) {
+      console.error('Error reviewing pitch:', error);
+      if (error instanceof GoogleGenerativeAIFetchError && (error.status === 401 || error.status === 403)) {
+        return NextResponse.json(
+          { error: 'The AI provider rejected the server API key or its permissions. Check or replace the key, then restart the server.' },
+          { status: 503 }
+        );
+      }
+      return NextResponse.json(
+        { error: 'AI review is unavailable. Please try again later or check the server AI configuration.' },
+        { status: 503 }
+      );
+    }
 
     // Save pitch submission only for authenticated users with a live DB connection
     if (isAuthenticated && supabase && userId) {

@@ -36,6 +36,7 @@ Vesto is an AI-powered investment learning platform: master the fundamentals, an
    - Company cards with metrics
    - Metrics display grids
    - Navigation layout (desktop + mobile)
+   - Light, Dark and System theme selector in the header; the selection is remembered in the browser
    - shadcn/ui components integrated
 
 6. **Main Pages**
@@ -114,6 +115,10 @@ FINNHUB_API_KEY=your_finnhub_api_key
 NEXTAUTH_SECRET=generate_a_random_secret_key
 NEXTAUTH_URL=http://localhost:3000
 ```
+
+If Google reports that the Gemini API key was leaked, revoke it in Google AI Studio,
+create a replacement, update `GOOGLE_GENERATIVE_AI_API_KEY` in `.env.local`, and
+restart the development server. Never commit or share the key.
 
 ### Run Development Server
 

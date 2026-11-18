@@ -2,11 +2,11 @@
 
 import * as React from 'react';
 import { Command } from 'cmdk';
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   BarChart3,
+  ArrowRight,
   BookOpen,
   BrainCircuit,
   BriefcaseBusiness,
@@ -23,12 +23,14 @@ import {
 } from 'lucide-react';
 
 import { BrandLogo } from '@/components/brand-logo';
+import { ThemeOptions, ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useCompanies } from '@/lib/hooks/use-companies';
-import { usePortfolio } from '@/lib/hooks/use-portfolio';
+import { usePortfolioStore } from '@/lib/hooks/use-portfolio-store';
 import { useUser } from '@/lib/hooks/use-user';
 import { createClient } from '@/lib/supabase/client';
+import { formatCurrency } from '@/lib/utils/format';
 import { MODULES } from '@/types';
 
 const navItems = [
@@ -70,7 +72,7 @@ function getInitials(label: string) {
   return (parts.length > 1 ? `${parts[0][0]}${parts[1][0]}` : parts[0]?.slice(0, 2) || 'A').toUpperCase();
 }
 
-function DashboardAccountMenu({ label, initials, onSignOut }: { label: string; initials: string; onSignOut: () => void }) {
+function DashboardAccountMenu({ label, initials, onSignOut, showThemeOptions = false }: { label: string; initials: string; onSignOut: () => void; showThemeOptions?: boolean }) {
   return (
     <details className="relative">
       <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-border bg-card py-1 pl-1 pr-2.5 text-sm text-foreground shadow-sm outline-none hover:bg-muted-bg focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
@@ -78,9 +80,10 @@ function DashboardAccountMenu({ label, initials, onSignOut }: { label: string; i
         <span className="max-w-[120px] truncate">{label}</span>
         <ChevronDown aria-hidden="true" className="h-4 w-4 text-muted-foreground" />
       </summary>
-      <div className="absolute right-0 top-full z-30 mt-2 w-40 rounded-lg border border-border bg-card p-1 shadow-xl">
-        <Link href="/account" className="block rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted-bg">Account</Link>
-        <button type="button" onClick={onSignOut} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-foreground hover:bg-muted-bg">
+      <div className="absolute right-0 top-full z-50 mt-2 w-44 rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-lg">
+        <Link href="/account" className="block rounded-md px-3 py-2 text-sm hover:bg-accent-bg hover:text-accent-text focus:bg-accent-bg focus:text-accent-text">Account</Link>
+        {showThemeOptions && <ThemeOptions />}
+        <button type="button" onClick={onSignOut} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-accent-bg hover:text-accent-text focus:bg-accent-bg focus:text-accent-text">
           <LogOut aria-hidden="true" className="h-4 w-4" />Sign out
         </button>
       </div>
@@ -93,8 +96,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const isDashboard = pathname === '/dashboard';
   const { companies, loading: companiesLoading } = useCompanies();
-  const { user, isAuthenticated } = useUser();
-  const { availableCash, portfolio } = usePortfolio();
+  const { user, isAuthenticated, loading: userLoading } = useUser();
+  const { summary, loading: portfolioLoading, error: portfolioError } = usePortfolioStore();
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [query, setQuery] = React.useState('');
   const [collapsed, setCollapsed] = React.useState(false);
@@ -133,6 +136,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const accountLabel = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Account';
   const accountInitials = getInitials(accountLabel);
+  const hasHoldings = isAuthenticated && (summary?.holdings.length ?? 0) > 0;
+  const sidebarDestination = hasHoldings ? '/portfolio' : '/fund-manager';
+  const sidebarAction = hasHoldings ? 'View Portfolio' : 'Start Simulation';
 
   if (pathname === '/') {
     return <>{children}</>;
@@ -142,11 +148,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen bg-background text-foreground">
       <aside
         className={cn(
-          'hidden border-r border-border bg-sidebar text-sidebar-foreground backdrop-blur md:flex md:flex-col md:transition-all md:duration-200',
+          'sticky top-0 hidden h-screen shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex md:transition-all md:duration-200',
           collapsed ? 'w-[88px]' : 'w-[240px]',
         )}
       >
-        <div className="flex items-center justify-between border-b border-sidebar-border px-4 py-3">
+        <div className="flex shrink-0 items-center justify-between border-b border-sidebar-border px-4 py-3">
           <Link href="/dashboard" className="flex items-center gap-3 overflow-hidden">
             {collapsed ? (
               <div className="flex h-8 w-8 items-center justify-center">
@@ -166,14 +172,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </button>
         </div>
 
-        <div className="flex flex-1 flex-col px-3 py-4">
-          <nav className="space-y-1">
+        <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-3 py-4" aria-label="Main sidebar">
             {navItems.map(({ href, label, icon: Icon }) => {
               const active = pathname === href || pathname.startsWith(`${href}/`);
               return (
                 <Link
                   key={href}
                   href={href}
+                  aria-label={collapsed ? label : undefined}
+                  aria-current={active ? 'page' : undefined}
+                  title={collapsed ? label : undefined}
                   className={cn(
                     'group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                     active
@@ -187,11 +195,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </Link>
               );
             })}
-          </nav>
+        </nav>
 
-          <div className="mt-auto border-t border-sidebar-border pt-3">
+          <div className="mt-auto shrink-0 border-t border-sidebar-border px-3 pb-4 pt-3">
             <Link
               href="/account"
+              aria-label={collapsed ? 'Account' : undefined}
+              aria-current={pathname === '/account' ? 'page' : undefined}
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/80 transition-colors hover:bg-white/5 hover:text-white',
                 collapsed && 'justify-center px-2',
@@ -201,39 +211,30 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <User className="h-4 w-4 shrink-0" />
               {!collapsed && <span>Account</span>}
             </Link>
-            {!collapsed && (isDashboard ? (
-              <div className="relative mt-3 overflow-hidden rounded-xl border border-sidebar-border bg-white/5 p-3">
-                <Image src="/brand/steps/step-learn.webp" alt="" width={112} height={88} className="mb-1 ml-auto h-16 w-20 object-contain" />
-                <p className="font-display text-sm font-bold text-white">Grow Your Investment Skills</p>
-                <p className="mt-1 text-[11px] leading-relaxed text-sidebar-foreground/75">Learn, practice and invest with confidence.</p>
-                <Link href="/learn" className="mt-3 block">
-                  <Button size="sm" className="w-full gap-1 bg-brand-gradient px-2 text-[11px] font-semibold text-white hover:opacity-90">
-                    Start Learning <TrendingUp className="h-3.5 w-3.5" />
-                  </Button>
-                </Link>
-              </div>
-            ) : !isDashboard && isAuthenticated && portfolio.length > 0 ? (
-              <div className="mt-3 rounded-xl border border-sidebar-border bg-white/5 p-3">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-sidebar-muted">Cash available</p>
-                <p className="mt-1 font-display text-lg font-bold text-white num">
-                  {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(availableCash)}
-                </p>
-              </div>
+            {collapsed ? (
+              <Link href={sidebarDestination} aria-label={sidebarAction} title={sidebarAction} className="mt-3 flex h-10 items-center justify-center rounded-lg bg-brand-gradient text-white outline-none hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring">
+                {hasHoldings ? <BriefcaseBusiness aria-hidden="true" className="h-4 w-4" /> : <TrendingUp aria-hidden="true" className="h-4 w-4" />}
+              </Link>
             ) : (
-              <div className="relative mt-3 overflow-hidden rounded-xl border border-sidebar-border bg-white/5 p-3">
-                <svg aria-hidden="true" viewBox="0 0 120 40" className="mb-2 h-9 w-full text-sidebar-active">
-                  <path d="M2 32 22 27 38 29 55 18 70 21 86 10 101 13 118 3" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <p className="text-xs font-semibold leading-relaxed text-white">Practice with <span className="text-sidebar-active">$10,000</span> Virtual Capital</p>
-                <Link href="/fund-manager" className="mt-3 block">
-                  <Button size="sm" className="w-full gap-1 bg-brand-gradient px-2 text-[11px] font-semibold text-white hover:opacity-90">
-                    Start Simulation <TrendingUp className="h-3.5 w-3.5" />
-                  </Button>
+              <div className="mt-3 rounded-xl border border-sidebar-border bg-white/5 p-3">
+                {userLoading || (isAuthenticated && portfolioLoading && !summary) ? (
+                  <p className="text-xs text-sidebar-foreground" aria-live="polite">Loading portfolio…</p>
+                ) : isAuthenticated && portfolioError && !summary ? (
+                  <p className="text-xs text-sidebar-foreground" role="status">Portfolio unavailable.</p>
+                ) : hasHoldings && summary ? (
+                  <div className="space-y-2">
+                    <p className="text-xs text-sidebar-foreground">Cash available <span className="block font-semibold text-white num">{formatCurrency(summary.cash)}</span></p>
+                    <p className="text-xs text-sidebar-foreground">Portfolio value <span className="block font-semibold text-white num">{formatCurrency(summary.totalValue)}</span></p>
+                  </div>
+                ) : (
+                  <p className="text-xs font-semibold leading-relaxed text-white">Practice with <span className="text-sidebar-active">$10,000</span> Virtual Capital</p>
+                )}
+                <Link href={sidebarDestination} className="mt-3 flex h-8 w-full items-center justify-center gap-1 rounded-md bg-brand-gradient px-2 text-[11px] font-semibold text-white outline-none hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring">
+                  {sidebarAction} <ArrowRight aria-hidden="true" className="h-3.5 w-3.5" />
                 </Link>
               </div>
-            ))}
+            )}
           </div>
-        </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -268,19 +269,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
               {!isDashboard && isAuthenticated && (
                 <div className="rounded-full border border-border bg-muted-bg px-3 py-1 text-xs font-medium text-foreground">
-                  Cash {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(availableCash)}
+                  Cash {summary ? formatCurrency(summary.cash) : '—'}
                 </div>
               )}
 
-              {isDashboard && isAuthenticated ? (
+              <ThemeToggle />
+              {isAuthenticated ? (
                 <DashboardAccountMenu label={accountLabel} initials={accountInitials} onSignOut={() => void handleSignOut()} />
-              ) : isAuthenticated ? (
-                <div className="flex items-center gap-2 rounded-full border border-border bg-card px-2.5 py-1.5 text-sm text-foreground shadow-sm">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                    <User className="h-3.5 w-3.5" />
-                  </div>
-                  <span className="max-w-[140px] truncate">{user?.email || 'Account'}</span>
-                </div>
               ) : (
                 <div className="flex items-center gap-2">
                   <Link href="/login">
@@ -307,7 +302,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               >
                 <Search className="h-4 w-4" />
               </button>
-              {isDashboard && isAuthenticated && <DashboardAccountMenu label={accountLabel} initials={accountInitials} onSignOut={() => void handleSignOut()} />}
+              <ThemeToggle />
+              {isAuthenticated && <DashboardAccountMenu label={accountLabel} initials={accountInitials} onSignOut={() => void handleSignOut()} showThemeOptions />}
             </div>
           </div>
         </header>
@@ -338,7 +334,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <Command.Dialog open={searchOpen} onOpenChange={setSearchOpen} label="Search companies and learning topics">
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
-          <div className="mx-auto mt-20 w-[min(92vw,640px)] overflow-hidden rounded-xl border border-border bg-card shadow-2xl">
+          <div className="relative z-50 mx-auto mt-20 w-[min(92vw,640px)] overflow-hidden rounded-lg border border-border bg-popover text-popover-foreground shadow-lg">
             <div className="flex items-center gap-2 border-b border-border px-3 py-2">
               <Search className="h-4 w-4 text-muted-foreground" />
               <Command.Input
@@ -361,7 +357,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     setSearchOpen(false);
                     router.push(`/markets/${company.symbol}`);
                   }}
-                  className="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 text-sm text-foreground aria-selected:bg-muted-bg"
+                  className="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 text-sm text-foreground focus:bg-accent-bg focus:text-accent-text data-[highlighted]:bg-accent-bg data-[highlighted]:text-accent-text aria-selected:bg-accent-bg aria-selected:text-accent-text"
                 >
                   <span className="font-medium">{company.symbol}</span>
                   <span className="ml-2 truncate text-muted-foreground">{company.name}</span>
@@ -378,7 +374,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       setSearchOpen(false);
                       router.push(`/learn/${module.id}`);
                     }}
-                    className="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 text-sm text-foreground aria-selected:bg-muted-bg"
+                    className="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 text-sm text-foreground focus:bg-accent-bg focus:text-accent-text data-[highlighted]:bg-accent-bg data-[highlighted]:text-accent-text aria-selected:bg-accent-bg aria-selected:text-accent-text"
                   >
                     <span className="truncate">{module.title}</span>
                     <span className="ml-2 shrink-0 text-xs text-muted-foreground">Module</span>

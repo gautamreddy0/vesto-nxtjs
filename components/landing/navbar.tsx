@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowRight, BarChart3, BookOpen, BrainCircuit, BriefcaseBusiness, ChevronDown, Menu, X } from 'lucide-react';
 
 import { BrandLogo } from '@/components/brand-logo';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { useUser } from '@/lib/hooks/use-user';
 import { isSupabaseConfigured } from '@/lib/supabase/client';
@@ -53,7 +54,7 @@ export function LandingNavbar() {
   const primaryLabel = isAuthenticated ? 'Open Dashboard' : 'Get Started Free';
 
   return (
-    <header className={cn('sticky top-0 z-50 h-[72px] border-b border-border bg-card transition-shadow', isScrolled && 'shadow-md')}>
+    <header className={cn('sticky top-0 z-40 h-[72px] border-b border-border bg-card transition-shadow', isScrolled && 'shadow-md')}>
       <nav aria-label="Main navigation" className="mx-auto flex h-full max-w-[1240px] items-center justify-between gap-5 px-4 sm:px-6">
         <Link href="/" aria-label="Vesto home" className="hidden shrink-0 items-center outline-none focus-visible:ring-2 focus-visible:ring-ring min-[1101px]:flex">
           <BrandLogo variant="full" className="h-12 w-auto" />
@@ -65,10 +66,10 @@ export function LandingNavbar() {
             <summary className="flex h-full cursor-pointer list-none items-center gap-1 border-b-2 border-transparent px-0.5 text-[15px] font-medium text-foreground outline-none hover:border-primary hover:text-primary focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
               Features <ChevronDown aria-hidden="true" className="h-3 w-3 transition-transform group-open:rotate-180 motion-reduce:transition-none" />
             </summary>
-            <div className="absolute left-1/2 top-full z-50 mt-1 w-[min(90vw,540px)] -translate-x-1/2 rounded-xl border border-border bg-card p-2 shadow-xl">
+            <div className="absolute left-1/2 top-full z-50 mt-1 w-[min(90vw,540px)] -translate-x-1/2 rounded-lg border border-border bg-popover p-2 text-popover-foreground shadow-lg">
               <div className="grid gap-1 sm:grid-cols-2">
                 {featureLinks.map(({ href, label, description, icon: Icon }) => (
-                  <Link key={href} href={href} className="group/item flex gap-3 rounded-lg p-3 outline-none transition-colors hover:bg-muted-bg focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none">
+                  <Link key={href} href={href} className="group/item flex gap-3 rounded-lg p-3 outline-none transition-colors hover:bg-accent-bg focus:bg-accent-bg focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none">
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent-bg text-accent-text"><Icon aria-hidden="true" className="h-5 w-5" /></span>
                     <span><span className="block text-sm font-semibold text-foreground group-hover/item:text-primary">{label}</span><span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{description}</span></span>
                   </Link>
@@ -81,15 +82,19 @@ export function LandingNavbar() {
           ))}
         </div>
 
-        <Link href={primaryHref} className="hidden shrink-0 min-[1101px]:block">
-          <Button className="gap-2 rounded-lg bg-brand-hero px-[22px] py-3 text-[15px] font-semibold text-white shadow-md hover:opacity-95 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transition-none">
-            {primaryLabel}<ArrowRight aria-hidden="true" className="h-4 w-4" />
-          </Button>
-        </Link>
+        <div className="hidden shrink-0 items-center gap-2 min-[1101px]:flex">
+          <ThemeToggle />
+          <Link href={primaryHref}>
+            <Button className="gap-2 rounded-lg bg-brand-hero px-[22px] py-3 text-[15px] font-semibold text-white shadow-md hover:opacity-95 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transition-none">
+              {primaryLabel}<ArrowRight aria-hidden="true" className="h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
 
         <div className="flex w-full items-center justify-between gap-2 min-[1101px]:hidden">
           <Link href="/" aria-label="Vesto home" className="flex items-center outline-none focus-visible:ring-2 focus-visible:ring-ring"><BrandLogo variant="full" className="h-10 w-auto min-[1101px]:h-12" /></Link>
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+            <ThemeToggle />
             <Link href={primaryHref} className="min-[1101px]:hidden">
               <Button className="gap-1 rounded-lg bg-brand-hero px-2.5 text-xs font-semibold text-white focus-visible:ring-2 focus-visible:ring-ring sm:gap-2 sm:px-4 sm:text-sm">
                 {primaryLabel}<ArrowRight aria-hidden="true" className="h-3.5 w-3.5 sm:h-4 sm:w-4" />

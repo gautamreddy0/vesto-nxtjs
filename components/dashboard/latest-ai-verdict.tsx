@@ -12,6 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 export function LatestAiVerdict() {
   const { pitch, loading } = useLatestPitch();
   const [memoOpen, setMemoOpen] = useState(false);
+  const reviewFailed = pitch?.status === 'rejected' && pitch.score === 0
+    && pitch.feedback === 'Unable to review pitch automatically. Please try again with more detail.';
 
   return (
     <Card className="relative min-w-0 overflow-hidden shadow-sm">
@@ -31,6 +33,14 @@ export function LatestAiVerdict() {
             <div className="h-7 w-24 animate-pulse rounded-full bg-muted-bg" />
             <div className="h-20 animate-pulse rounded-lg bg-muted-bg" />
             <div className="h-10 animate-pulse rounded-lg bg-muted-bg" />
+          </div>
+        ) : pitch && reviewFailed ? (
+          <div className="flex min-h-[190px] flex-col items-start justify-center">
+            <p className="font-display text-base font-semibold text-foreground">AI review unavailable</p>
+            <p className="mt-2 text-sm text-muted-foreground">The previous review failed; your pitch was not evaluated.</p>
+            <Link href={`/fund-manager?symbol=${encodeURIComponent(pitch.symbol)}`} className="mt-5 inline-flex items-center gap-2 rounded-md bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground outline-none hover:bg-primary-hover focus-visible:ring-2 focus-visible:ring-ring">
+              Retry review <ArrowRight aria-hidden="true" className="h-4 w-4" />
+            </Link>
           </div>
         ) : pitch ? (
           <div className="space-y-4">
@@ -68,7 +78,7 @@ export function LatestAiVerdict() {
           </div>
         )}
       </CardContent>
-      {pitch && (
+      {pitch && !reviewFailed && (
         <Dialog open={memoOpen} onOpenChange={setMemoOpen}>
           <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
             <DialogHeader>

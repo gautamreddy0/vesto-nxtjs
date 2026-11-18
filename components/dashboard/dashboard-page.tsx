@@ -166,8 +166,8 @@ function DashboardSkeleton() {
         <Card className="h-[360px] animate-pulse border-transparent bg-muted-bg shadow-none" />
         <Card className="h-[360px] animate-pulse border-transparent bg-muted-bg shadow-none" />
       </div>
-      <div className="grid gap-4 md:grid-cols-2 min-[1280px]:grid-cols-3">
-        {Array.from({ length: 3 }, (_, index) => <Card key={index} className="h-[330px] animate-pulse border-transparent bg-muted-bg shadow-none" />)}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 3 }, (_, index) => <Card key={index} className={`h-[330px] animate-pulse border-transparent bg-muted-bg shadow-none ${index === 2 ? 'md:col-span-2 lg:col-span-1' : ''}`} />)}
       </div>
       <div className="grid gap-4 xl:grid-cols-2">
         {Array.from({ length: 2 }, (_, index) => <Card key={index} className="h-[250px] animate-pulse border-transparent bg-muted-bg shadow-none" />)}

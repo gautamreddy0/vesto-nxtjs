@@ -63,7 +63,7 @@ export function AiFundManagerCta({ companyData, compact = false }: AiFundManager
   };
 
   return (
-    <Card className="overflow-hidden border-border shadow-sm">
+    <Card className="@container overflow-hidden border-border shadow-sm">
       <CardHeader className={compact ? 'p-4 sm:p-5' : 'p-5 sm:p-6'}>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-start gap-3">
@@ -78,7 +78,7 @@ export function AiFundManagerCta({ companyData, compact = false }: AiFundManager
           <Link href="/#how-it-works" className="text-sm font-medium text-primary-text outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring">How it works</Link>
         </div>
       </CardHeader>
-      <CardContent className={compact ? 'grid gap-6 p-4 pt-0 sm:p-5 sm:pt-0 lg:grid-cols-[1.2fr_0.8fr]' : 'grid gap-6 p-5 pt-0 sm:p-6 sm:pt-0 lg:grid-cols-[1.2fr_0.8fr]'}>
+      <CardContent className={compact ? 'grid gap-6 p-4 pt-0 sm:p-5 sm:pt-0 @3xl:grid-cols-[1.2fr_0.8fr]' : 'grid gap-6 p-5 pt-0 sm:p-6 sm:pt-0 @3xl:grid-cols-[1.2fr_0.8fr]'}>
         <div>
           <label htmlFor={`pitch-${symbol}`} className="mb-2 block text-sm font-medium text-foreground">Pitch: {company.name} ({symbol})</label>
           <Textarea
@@ -103,7 +103,7 @@ export function AiFundManagerCta({ companyData, compact = false }: AiFundManager
           </div>
         </div>
 
-        <ul className="grid content-center gap-3 sm:grid-cols-2 lg:grid-cols-1">
+        <ul className="grid grid-cols-2 content-center gap-3 @3xl:grid-cols-1">
           {checklist.map((item) => (
             <li key={item} className="flex items-center gap-2 text-sm text-muted-foreground">
               <CheckCircle2 aria-hidden="true" className="h-4 w-4 shrink-0 text-accent-text" />

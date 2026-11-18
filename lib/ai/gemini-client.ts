@@ -43,12 +43,9 @@ export async function generateJSON(prompt: string) {
       console.error('Cleaned text:', cleanedText);
       throw new Error(`Failed to parse JSON response: ${parseError.message}. Raw response: ${text.substring(0, 200)}`);
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in generateJSON:', error);
-    if (error.message?.includes('parse')) {
-      throw error;
-    }
-    throw new Error(`Failed to generate JSON: ${error.message || 'Unknown error'}`);
+    throw error;
   }
 }
 

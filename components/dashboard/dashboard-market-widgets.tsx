@@ -20,7 +20,7 @@ export function DashboardMarketWidgets() {
   const asOf = useMemo(() => getDataAsOf(companies), [companies]);
 
   return (
-    <section aria-label="Market snapshot, watchlist, and top movers" className="grid min-w-0 gap-4 md:grid-cols-2 min-[1280px]:grid-cols-3">
+    <section aria-label="Market snapshot, watchlist, and top movers" className="grid min-w-0 items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3">
       <MarketSnapshotCard market={market} asOf={asOf} loading={loading} error={Boolean(error)} />
       <WatchlistCard companies={companies} loading={loading} />
       <TopMoversCard movers={movers} mode={moverMode} onModeChange={setMoverMode} loading={loading} error={Boolean(error)} />
@@ -43,11 +43,11 @@ function MarketSnapshotCard({ market, asOf, loading, error }: { market: MarketSu
   const advancerWidth = moversTotal > 0 ? (market.advancers / moversTotal) * 100 : 0;
 
   return (
-    <Card className="min-w-0 shadow-sm">
-      <CardHeader className="flex-row items-start justify-between gap-2 p-4 pb-3 sm:p-5 sm:pb-3">
-        <div>
-          <CardTitle className="font-display text-lg">Market Snapshot</CardTitle>
-          <p className="mt-1 text-xs text-muted-foreground">Vesto universe · {asOf}</p>
+    <Card className="flex h-full min-w-0 flex-col shadow-sm">
+      <CardHeader className="flex-row items-start justify-between gap-2 p-4 pb-3 sm:p-5 sm:pb-3 lg:flex-col xl:flex-row">
+        <div className="min-w-0">
+          <CardTitle className="whitespace-nowrap font-display text-lg">Market Snapshot</CardTitle>
+          <p className="mt-1 truncate text-xs text-muted-foreground">Vesto universe · {asOf}</p>
         </div>
         <Link href="/markets" className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-primary-text outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring">View Markets <ArrowRight aria-hidden="true" className="h-3.5 w-3.5" /></Link>
       </CardHeader>
@@ -92,7 +92,7 @@ function WatchlistCard({ companies, loading }: { companies: CompanyEntry[]; load
   const watchlisted = symbols.map((symbol) => companyMap.get(symbol.toUpperCase())).filter((entry): entry is CompanyEntry => Boolean(entry)).slice(0, 4);
 
   return (
-    <Card className="min-w-0 shadow-sm">
+    <Card className="flex h-full min-w-0 flex-col shadow-sm">
       <CardHeader className="flex-row items-center justify-between gap-2 p-4 pb-3 sm:p-5 sm:pb-3">
         <CardTitle className="font-display text-lg">My Watchlist</CardTitle>
         <Link href="/markets?tab=watchlist" className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-primary-text outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring">View All <ArrowRight aria-hidden="true" className="h-3.5 w-3.5" /></Link>
@@ -131,9 +131,9 @@ function WatchlistRow({ entry }: { entry: CompanyEntry }) {
           <span className="block truncate text-sm font-semibold text-foreground">{symbol}</span>
           <span className="block truncate text-[11px] text-muted-foreground">{entry.company.name}</span>
         </span>
-        <span className="text-right">
-          <span className="block text-sm font-semibold text-foreground num">{price == null ? '—' : formatCurrency(price)}</span>
-          <Delta value={entry.quote?.percent_change} className="text-[11px]" />
+        <span className="whitespace-nowrap text-right num">
+          <span className="block text-sm font-semibold text-foreground">{price == null ? '—' : formatCurrency(price)}</span>
+          <Delta value={entry.quote?.percent_change} className="whitespace-nowrap text-[11px]" />
         </span>
         <span className="col-span-3 flex items-center gap-2 pl-[50px]" aria-label={hasRange ? `52-week range from ${formatCurrency(low)} to ${formatCurrency(high)}` : '52-week range unavailable'}>
           <span className="relative h-1.5 flex-1 rounded-full bg-muted-bg">
@@ -149,7 +149,7 @@ function WatchlistRow({ entry }: { entry: CompanyEntry }) {
 
 function TopMoversCard({ movers, mode, onModeChange, loading, error }: { movers: CompanyEntry[]; mode: 'gainers' | 'losers'; onModeChange: (mode: 'gainers' | 'losers') => void; loading: boolean; error: boolean }) {
   return (
-    <Card className="min-w-0 shadow-sm">
+    <Card className="flex h-full min-w-0 flex-col shadow-sm md:col-span-2 lg:col-span-1">
       <CardHeader className="flex-row flex-wrap items-center justify-between gap-2 p-4 pb-3 sm:p-5 sm:pb-3">
         <CardTitle className="font-display text-lg">Top Movers</CardTitle>
         <div className="flex items-center gap-1 rounded-lg bg-muted-bg p-1" role="group" aria-label="Top movers direction">
@@ -186,9 +186,9 @@ function MoverRow({ entry, mode }: { entry: CompanyEntry; mode: 'gainers' | 'los
           <span className="block truncate text-sm font-semibold text-foreground">{symbol}</span>
           <span className="block truncate text-[11px] text-muted-foreground">{entry.company.name}</span>
         </span>
-        <span className="text-right">
-          <span className="block text-sm font-semibold text-foreground num">{price == null ? '—' : formatCurrency(price)}</span>
-          <Delta value={change} className="text-[11px]" />
+        <span className="whitespace-nowrap text-right num">
+          <span className="block text-sm font-semibold text-foreground">{price == null ? '—' : formatCurrency(price)}</span>
+          <Delta value={change} className="whitespace-nowrap text-[11px]" />
         </span>
         <span className={`col-span-3 flex items-center gap-1 pl-[50px] text-[10px] font-medium ${mode === 'gainers' ? 'text-success' : 'text-danger'}`}>
           <Direction aria-hidden="true" className="h-3 w-3" />{change == null ? 'Change unavailable' : `${mode === 'gainers' ? 'Gainer' : 'Decliner'} · ${Math.abs(change).toFixed(2)}%`}

@@ -3,7 +3,8 @@ import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
 import { AppShell } from "@/components/app-shell";
-import { Toaster } from "sonner";
+import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeToaster } from "@/components/theme-toaster";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const plusJakarta = Plus_Jakarta_Sans({
@@ -41,10 +42,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${plusJakarta.variable}`}>
-        <AppShell>{children}</AppShell>
-        <Toaster position="top-right" richColors />
+        <ThemeProvider>
+          <AppShell>{children}</AppShell>
+          <ThemeToaster />
+        </ThemeProvider>
       </body>
     </html>
   );

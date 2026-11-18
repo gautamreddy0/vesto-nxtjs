@@ -519,7 +519,7 @@ export default function ModulePage() {
       </div>
 
       {/* Progress */}
-      <Card className="border-[#e0ddd8] dark:border-[#3a3a38] bg-white dark:bg-[#242422]">
+      <Card className="border-border bg-card">
         <CardContent className="pt-6">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-[#2d2d2d] dark:text-[#e8e6e3]">Progress</span>
@@ -996,7 +996,7 @@ export default function ModulePage() {
                     router.push('/learn');
                   }}
                   disabled={isSaving}
-                  className="bg-white hover:bg-[#f5f4f2] text-[#2d2d2d] border border-[#e0ddd8] shadow-sm dark:bg-[#242422] dark:hover:bg-[#2a2a28] dark:text-[#e8e6e3] dark:border-[#3a3a38]"
+                  className="border border-border bg-card text-card-foreground shadow-sm hover:bg-muted-bg"
                 >
                   {isSaving ? 'Saving...' : 'Back to Modules'}
                 </Button>

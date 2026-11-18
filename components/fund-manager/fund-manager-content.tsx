@@ -78,7 +78,8 @@ export function FundManagerContent({ initialSymbol = '' }: { initialSymbol?: str
     'Risks\nIdentify material risks and explain how they could affect your view.',
     'Thesis\nState your investment rationale and what could change your mind.',
   ].join('\n\n'));
-  const [feedback, setFeedback] = useState<any>(null);
+  const [feedback, setFeedback] = useState<PitchMemoData | null>(null);
+  const [reviewError, setReviewError] = useState<string | null>(null);
   const [evaluatedPitch, setEvaluatedPitch] = useState<string | null>(null);
   const [pitchWarning, setPitchWarning] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -106,6 +107,7 @@ export function FundManagerContent({ initialSymbol = '' }: { initialSymbol?: str
       setPitch(nextPitch);
       setPitchWarning(Boolean(storedDraft && storedDraft.length > PITCH_MAX_CHARS));
       setFeedback(null);
+      setReviewError(null);
       setEvaluatedPitch(null);
     } catch {
       setPitch('');
@@ -117,6 +119,9 @@ export function FundManagerContent({ initialSymbol = '' }: { initialSymbol?: str
     if (!selectedCompany || !pitch.trim()) return;
 
     setLoading(true);
+    setFeedback(null);
+    setReviewError(null);
+    setEvaluatedPitch(null);
     try {
       const response = await fetch('/api/simulator/pitch', {
         method: 'POST',
@@ -130,8 +135,9 @@ export function FundManagerContent({ initialSymbol = '' }: { initialSymbol?: str
       });
 
       const result = await response.json();
-      if (!response.ok) throw new Error(result?.details || result?.error || 'Unable to review pitch');
+      if (!response.ok) throw new Error(result?.error || 'Unable to review pitch');
       const review = result?.data?.review ?? null;
+      if (!review) throw new Error('The AI review did not return a verdict. Please try again.');
       setFeedback(review);
       setEvaluatedPitch(pitch);
       if (review) {
@@ -140,8 +146,8 @@ export function FundManagerContent({ initialSymbol = '' }: { initialSymbol?: str
       if (review?.status === 'approved' && selectedCompany?.company.symbol) {
         saveDemoApproval(selectedCompany.company.symbol);
       }
-    } catch (error: any) {
-      setFeedback({ status: 'rejected', message: error.message || 'Unable to review this pitch.' });
+    } catch (error: unknown) {
+      setReviewError(error instanceof Error ? error.message : 'Unable to review this pitch. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -258,6 +264,10 @@ export function FundManagerContent({ initialSymbol = '' }: { initialSymbol?: str
               {loading ? 'Reviewing pitch…' : 'Submit for AI Evaluation'}
               {!loading && <ArrowRight aria-hidden="true" className="h-4 w-4" />}
             </Button>
+
+            {reviewError && (
+              <p role="alert" className="rounded-lg border border-danger bg-danger-bg p-4 text-sm text-danger">{reviewError}</p>
+            )}
 
             {feedback && selectedCompany && (
               <div id="pitch-evaluation">

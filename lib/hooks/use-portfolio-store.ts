@@ -14,6 +14,11 @@ interface PortfolioStoreState {
 }
 
 const localStore = new LocalStore();
+const listeners = new Set<(store: PortfolioStore, summary: PortfolioSummary) => void>();
+
+function publishSummary(store: PortfolioStore, summary: PortfolioSummary) {
+  listeners.forEach((listener) => listener(store, summary));
+}
 
 export function usePortfolioStore() {
   const { user, loading: userLoading, isAuthenticated } = useUser();
@@ -23,6 +28,14 @@ export function usePortfolioStore() {
     loading: true,
     error: null,
   });
+
+  useEffect(() => {
+    const listener = (store: PortfolioStore, summary: PortfolioSummary) => {
+      setState((current) => current.store?.mode === store.mode ? { ...current, summary, error: null } : current);
+    };
+    listeners.add(listener);
+    return () => { listeners.delete(listener); };
+  }, []);
 
   const refresh = useCallback(async () => {
     if (userLoading) return null;
@@ -58,6 +71,7 @@ export function usePortfolioStore() {
     const store = state.store ?? localStore;
     const summary = await store.buy(symbol, order);
     setState({ store, summary, loading: false, error: null });
+    publishSummary(store, summary);
     return summary;
   }, [state.store]);
 
@@ -65,6 +79,7 @@ export function usePortfolioStore() {
     const store = state.store ?? localStore;
     const summary = await store.sell(symbol, shares);
     setState({ store, summary, loading: false, error: null });
+    publishSummary(store, summary);
     return summary;
   }, [state.store]);
 
@@ -72,6 +87,7 @@ export function usePortfolioStore() {
     const store = state.store instanceof ApiStore ? localStore : (state.store ?? localStore);
     const summary = await store.reset();
     setState({ store, summary, loading: false, error: null });
+    publishSummary(store, summary);
     return summary;
   }, [state.store]);
 
@@ -79,6 +95,7 @@ export function usePortfolioStore() {
     if (!(state.store instanceof LocalStore)) throw new Error('Sample data is only available in demo mode.');
     const summary = await state.store.loadSamplePortfolio();
     setState((current) => ({ ...current, summary, loading: false, error: null }));
+    publishSummary(state.store, summary);
     return summary;
   }, [state.store]);
 
